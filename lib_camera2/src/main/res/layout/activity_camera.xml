@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearSum"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000"
+    android:orientation="vertical"
+    tools:context=".activities.CameraActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarSettingCamera"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/imgActionFlash"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_flash_clicked_01" />
+
+            <ImageView
+                android:id="@+id/imgActionTimer"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/ic_time_camera_unclicked_1" />
+
+            <ImageView
+                android:id="@+id/imgActionVolumn"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="10dp"
+                android:src="@drawable/ic_volum_camera_unclicked_01" />
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <FrameLayout
+            android:id="@+id/frameTextureView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.cpr.lib_camera2.customview.AutoFitTextureView
+                android:id="@+id/texttureView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8dp"
+                android:focusable="true" />
+
+            <com.cpr.lib_camera2.customview.VerticalSeekbar
+                android:id="@+id/seekbarZoom"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:visibility="gone"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="120dp"
+                android:max="100" />
+
+            <SeekBar
+                android:id="@+id/seekbarWhiteBlance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="120dp"
+                android:max="100" />
+
+        </FrameLayout>
+
+
+        <TextView
+            android:id="@+id/txtTimer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/lato_light"
+            android:gravity="center"
+            android:text="5"
+            android:textColor="@color/colorWhiteLibrary"
+            android:textSize="100dp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/linearBottom"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="25dp"
+            android:orientation="horizontal"
+            android:weightSum="9">
+
+            <LinearLayout
+                android:id="@+id/linearGallery"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginLeft="38dp"
+                android:layout_weight="1.5"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:weightSum="2">
+
+                <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="0dp"-->
+                <!--android:layout_weight="1"></LinearLayout>-->
+
+                <ImageView
+                    android:id="@+id/imgActionGalleryActivityCamera"
+                    android:layout_width="match_parent"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/library_bg_icon_gallery" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="5.4"
+                android:gravity="center"
+                android:weightSum="6">
+
+                <ImageView
+                    android:id="@+id/imgActionCamera"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/library_bg_icon_capture" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/linearSwitchCamera"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="38dp"
+                android:layout_weight="1.5"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:weightSum="2">
+
+
+                <ImageView
+                    android:id="@+id/imgActionSwitchCamera"
+                    android:layout_width="match_parent"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/library_bg_icon_switch_camera" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+</LinearLayout>

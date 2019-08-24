@@ -1,0 +1,2 @@
+include ':app', ':lib_camera2'
+project (":lib_camera2").projectDir = new File("C:/Users/Dell/AndroidStudioProjects/DemoLibCamera2/lib_camera2")
