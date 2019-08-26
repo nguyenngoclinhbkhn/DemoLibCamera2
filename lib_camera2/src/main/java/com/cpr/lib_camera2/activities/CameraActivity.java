@@ -159,6 +159,8 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private boolean isVolumn = true;
     private boolean isFlash = false;
 
+    private int totalOrientation = 0;
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private CameraCaptureSession.CaptureCallback captureCallback = new CameraCaptureSession.CaptureCallback() {
 
@@ -256,7 +258,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         });
 
 
-        handler = new Handler();
+//        handler = new Handler();
 
 
         imgActionFlash.setOnClickListener(new View.OnClickListener() {
@@ -646,6 +648,16 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                             previewSize.getHeight(), previewSize.getWidth());
                 }
 
+                totalOrientation = sensorDeviceRotation(cameraManager.getCameraCharacteristics(cameraManager.getCameraIdList()[1])
+                        , deviceOrientation);
+                Log.e("TAG", "orientation " + orientation);
+                Log.e("TAG", "swapRotation " + swapRotation);
+                Log.e("TAG", "Device orientation " + deviceOrientation);
+                Log.e("TAG", "total rotation " + totalRotation);
+
+                Log.e("TAG", "sensor device " +
+                        sensorDeviceRotation(cameraManager.getCameraCharacteristics(cameraManager.getCameraIdList()[1])
+                        , deviceOrientation));
                 return;
             }
         } catch (CameraAccessException e) {
@@ -773,6 +785,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     public void reopenCamera() {
         CameraManager cameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
         if (textureView.isAvailable()) {
+//            setupCamera(textureView.getWidth(), textureView.getHeight());
             connectCamera();
         } else {
             textureView.setSurfaceTextureListener(surfaceTextureListener);
@@ -857,13 +870,15 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     }
 
     private void stopBackgroundThread() {
-        backgroundThread.quitSafely();
-        try {
-            backgroundThread.join();
-            backgroundThread = null;
-            backgroundHandler = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (backgroundHandler != null) {
+            backgroundThread.quitSafely();
+            try {
+                backgroundThread.join();
+                backgroundThread = null;
+                backgroundHandler = null;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -949,6 +964,18 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopBackgroundThread();
+        closeCamera();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void takePicture() {
@@ -1022,6 +1049,13 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                     try {
                         output = new FileOutputStream(fileImage);
                         output.write(bytes);
+                        Intent intent = new Intent(CameraActivity.this, ShowImageActivity.class);
+                        intent.putExtra("path", fileImage.getAbsolutePath());
+                        Log.e("TAG", "path " + fileImage.getAbsolutePath());
+                        intent.putExtra("camera", camera);
+                        intent.putExtra("rotation", String.valueOf(totalOrientation));
+                        Log.e("TAG", "rotation " + totalOrientation);
+                        startActivity(intent);
                     } finally {
                         if (null != output) {
                             output.close();
@@ -1034,11 +1068,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 @Override
                 public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
-                    Intent intent = new Intent(CameraActivity.this, ShowImageActivity.class);
-                    intent.putExtra("path", fileImage.getAbsolutePath());
-                    Log.e("TAG", "paht " + fileImage.getAbsolutePath());
-                    intent.putExtra("camera", camera);
-                    startActivity(intent);
+
 //                    Toast.makeText(CameraActivity.this, "Saved:" + fileImage, Toast.LENGTH_SHORT).show();
 //                    startPreview();
                 }
@@ -1094,16 +1124,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             keyActionCamera = 0;
             countTimer = 0;
             timer = 0;
-            startBackgroundThread();
-            sensorManager.registerListener(this,
-                    sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                    SensorManager.SENSOR_DELAY_NORMAL);
-            if (textureView.isAvailable()) {
-                setupCamera(textureView.getWidth(), textureView.getHeight());
-                connectCamera();
-            } else {
-                textureView.setSurfaceTextureListener(surfaceTextureListener);
-            }
             Intent intent12 = getIntent();
             if (intent12.getStringExtra("NameFolder") != null) {
                 String path = intent12.getStringExtra("NameFolder");
@@ -1115,6 +1135,16 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             } else {
                 Name_File_Photo = "CPRPhoto";
             }
+//            startBackgroundThread();
+            sensorManager.registerListener(this,
+                    sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                    SensorManager.SENSOR_DELAY_NORMAL);
+//            if (textureView.isAvailable()) {
+//                setupCamera(textureView.getWidth(), textureView.getHeight());
+//                connectCamera();
+//            } else {
+//                textureView.setSurfaceTextureListener(surfaceTextureListener);
+//            }
         }
     }
 
@@ -1144,7 +1174,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             }
 
         }
-        Log.e("TAG", "lux " + lux);
     }
 
     @Override

@@ -16,11 +16,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Surface;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -48,6 +51,7 @@ public class ShowImageActivity extends AppCompatActivity implements View.OnClick
     private ImageView imageViewLoading;
     private String camera;
     private Bitmap bitmapSum;
+    private int rotation = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,17 +63,35 @@ public class ShowImageActivity extends AppCompatActivity implements View.OnClick
         Intent intent = getIntent();
         path = intent.getStringExtra("path");
         camera = intent.getStringExtra("camera");
+        if (!TextUtils.isEmpty(intent.getStringExtra("rotation"))) {
+            rotation = Integer.parseInt(intent.getStringExtra("rotation"));
+            Log.e("TAG", "rotation not null " + rotation);
+
+        } else {
+            rotation = 0;
+            Log.e("TAG", "rotation null" + rotation);
+
+        }
+        Log.e("TAG", "path showimage " + path);
+        Log.e("TAG", "camera " + camera);
         photoView = findViewById(R.id.photoView);
         fileUtils = new FileUtils(this);
         btnOk.setOnClickListener(this);
         btnNo.setOnClickListener(this);
-        if (camera.equals("Front")){
-            btnOk.setEnabled(false);
-            btnNo.setEnabled(false);
-            new ShowPicture().execute(path);
-        }else{
-            Glide.with(this).load(path).into(photoView);
-        }
+        new ShowPicture().execute(path);
+//        photoView.setImageBitmap(getBitmap(path));
+
+//        getBitmap(path);
+//        Glide.with(this).load(path).into(photoView);
+//        if (camera.equals("Front")) {
+//            btnOk.setEnabled(false);
+//            btnNo.setEnabled(false);
+//            new ShowPicture().execute(path);
+//        } else {
+//////
+//            photoView.setImageBitmap(getBitmap(path));
+////            Glide.with(this).load(path).into(photoView);
+//        }
 //        Bitmap bitmap = BitmapFactory.decodeFile(path);
 
 //        ShowPicture show = new ShowPicture(idCamera);
@@ -82,7 +104,7 @@ public class ShowImageActivity extends AppCompatActivity implements View.OnClick
             new File(path).delete();
             finish();
         } else if (view.getId() == R.id.btnOk) {
-            if (camera.equals("Front")){
+            if (camera.equals("Front")) {
                 savePhoto(bitmapSum, path);
                 pathImage = path;
             }
@@ -97,20 +119,13 @@ public class ShowImageActivity extends AppCompatActivity implements View.OnClick
         private SpotsDialog dialog;
 
 
-//        public ShowPicture(String idCamera) {
-//            this.idCamera = idCamera;
-//        }
 
 
         @Override
         protected Bitmap doInBackground(String... strings) {
-            Bitmap bitmap = BitmapFactory.decodeFile(strings[0]);
-            Matrix matrix = new Matrix();
-            matrix.setRotate(270);
-            Bitmap bitmapRotate = Bitmap.createBitmap(bitmap, 0, 0,
-                    bitmap.getWidth(), bitmap.getHeight(), matrix, false);
-//            savePhoto(bitmapRotate);
-            return bitmapRotate;
+            Bitmap bitmap = getBitmap(strings[0]);
+            savePhoto(bitmap, path);
+            return bitmap;
         }
 
         @Override
@@ -217,32 +232,50 @@ public class ShowImageActivity extends AppCompatActivity implements View.OnClick
 
     private Bitmap getBitmap(String path) {
         ExifInterface ei = null;
-        Bitmap rotatedBitmap;
+        Bitmap rotatedBitmap = null;
         Bitmap bitmapSum = BitmapFactory.decodeFile(path);
         try {
             ei = new ExifInterface(path);
             int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_UNDEFINED);
-
+            Log.e("TAG", "ei " + ei);
             switch (orientation) {
 
                 case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotatedBitmap = rotateImage(bitmapSum, 90);
+//                    rotatedBitmap = rotateImage(bitmapSum, 180);
+
+                    if (camera.equals("Front")) {
+                        int angle = rotation - 90;
+                        rotatedBitmap = rotateImage(bitmapSum, angle);
+                    }else {
+                        rotatedBitmap = rotateImage(bitmapSum, 90);
+                    }
+                    Log.e("TAG", "orientation 90 " + ExifInterface.ORIENTATION_ROTATE_90);
                     break;
 
                 case ExifInterface.ORIENTATION_ROTATE_180:
                     rotatedBitmap = rotateImage(bitmapSum, 180);
+                    Log.e("TAG", "orientation 180 " + ExifInterface.ORIENTATION_ROTATE_180);
                     break;
 
                 case ExifInterface.ORIENTATION_ROTATE_270:
                     rotatedBitmap = rotateImage(bitmapSum, 270);
+                    Log.e("TAG", "orientation 270 " + ExifInterface.ORIENTATION_ROTATE_270);
                     break;
 
                 case ExifInterface.ORIENTATION_NORMAL:
+                    Log.e("TAG", " orientation normal");
                     rotatedBitmap = bitmapSum;
                     break;
                 default:
-                    rotatedBitmap = bitmapSum;
+                    Log.e("TAG", " orientation not detect");
+                    if (camera.equals("Front")){
+                        int angle = -rotation - 180;
+                        rotatedBitmap = rotateImage(bitmapSum, angle);
+                    }else {
+//                    rotatedBitmap = rotateImage(bitmapSum, -90);
+                        rotatedBitmap = bitmapSum;
+                    }
             }
         } catch (
                 IOException e) {
@@ -250,13 +283,13 @@ public class ShowImageActivity extends AppCompatActivity implements View.OnClick
         }
 
 
-        return bitmapSum;
+        return rotatedBitmap;
 
     }
 
     public static Bitmap rotateImage(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
+        matrix.setRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
                 matrix, true);
     }
